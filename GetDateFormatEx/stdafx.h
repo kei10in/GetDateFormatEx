@@ -9,6 +9,12 @@
 
 #define WIN32_LEAN_AND_MEAN             // Windows ヘッダーから使用されていない部分を除外します。
 
+// Windows
+#include <Windows.h>
 
+// STL
+#include <string>
 
-// TODO: プログラムに必要な追加ヘッダーをここで参照してください。
+// Boost
+#include <boost/lexical_cast.hpp>
+
