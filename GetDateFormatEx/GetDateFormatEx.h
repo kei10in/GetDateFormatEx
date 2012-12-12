@@ -6,6 +6,14 @@
 
 #include <string>
 
+
+extern std::wstring GetDateFormatEx(
+    LPCWSTR lpLocaleName,
+    DWORD dwFlags,
+    SYSTEMTIME const* st,
+    LPCWSTR lpFormat,
+    LPCWSTR lpCalendar);
+
 extern std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
     DWORD dwFlags,
