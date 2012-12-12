@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GetDateFormatEx", "GetDateFormatEx\GetDateFormatEx.vcxproj", "{AB20C7EE-4A6C-42EE-9D64-B312E2315CAE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestGetDateFormatEx", "TestGetDateFormatEx\TestGetDateFormatEx.vcxproj", "{DBE91819-1A33-4FA5-9920-DF7DC0AFFE10}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GoogleTest", "GoogleTest\GoogleTest.vcxproj", "{CE59E694-6E40-43D8-BE2E-720AB7A17E5D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB20C7EE-4A6C-42EE-9D64-B312E2315CAE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AB20C7EE-4A6C-42EE-9D64-B312E2315CAE}.Debug|Win32.Build.0 = Debug|Win32
+		{AB20C7EE-4A6C-42EE-9D64-B312E2315CAE}.Release|Win32.ActiveCfg = Release|Win32
+		{AB20C7EE-4A6C-42EE-9D64-B312E2315CAE}.Release|Win32.Build.0 = Release|Win32
+		{DBE91819-1A33-4FA5-9920-DF7DC0AFFE10}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DBE91819-1A33-4FA5-9920-DF7DC0AFFE10}.Debug|Win32.Build.0 = Debug|Win32
+		{DBE91819-1A33-4FA5-9920-DF7DC0AFFE10}.Release|Win32.ActiveCfg = Release|Win32
+		{DBE91819-1A33-4FA5-9920-DF7DC0AFFE10}.Release|Win32.Build.0 = Release|Win32
+		{CE59E694-6E40-43D8-BE2E-720AB7A17E5D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CE59E694-6E40-43D8-BE2E-720AB7A17E5D}.Debug|Win32.Build.0 = Debug|Win32
+		{CE59E694-6E40-43D8-BE2E-720AB7A17E5D}.Release|Win32.ActiveCfg = Release|Win32
+		{CE59E694-6E40-43D8-BE2E-720AB7A17E5D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
