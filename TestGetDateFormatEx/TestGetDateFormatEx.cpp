@@ -4,60 +4,43 @@
 
 #include "GetDateFormatEx.h"
 
+struct YearFormatTestParam {
+    WORD year;
+    LPCWSTR format;
+    LPCWSTR expected;
+};
 
-TEST(TestGetDateFormatEx, Format_yyyy_By2012Gets2012) {
+
+class TestYearFormat : public ::testing::TestWithParam<YearFormatTestParam> {
+};
+
+TEST_P(TestYearFormat, FormatYearGetsStrings) {
+    YearFormatTestParam param = GetParam();
+    
     SYSTEMTIME st;
-    st.wYear = 2012;
+    st.wYear = param.year;
     std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"yyyy", CAL_GREGORIAN));
-    std::wstring expected(L"2012");
+        GetDateFormatEx(L"en-US", 0, &st, param.format, CAL_GREGORIAN));
+    std::wstring expected(param.expected);
     ASSERT_EQ(expected, actual);    
 }
 
-TEST(TestGetDateFormatEx, Format_yyyy_By2011Gets2011) {
-    SYSTEMTIME st;
-    st.wYear = 2011;
-    std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"yyyy", CAL_GREGORIAN));
-    std::wstring expected(L"2011");
-    ASSERT_EQ(expected, actual);    
+std::vector<YearFormatTestParam> GenYearFormatTestParamList() {
+    static YearFormatTestParam params[] = {
+        { 2012, L"yyyy", L"2012" },
+        { 2011, L"yyyy", L"2011" },
+        { 2012, L"yy", L"12" },
+        { 2009, L"yy", L"09" },
+        { 2009, L"y", L"9" },
+        
+    };
+    return std::vector<YearFormatTestParam>(params, params + _countof(params));
 }
 
-TEST(TestGetDateFormatEx, Format_yy_By2011Gets11) {
-    SYSTEMTIME st;
-    st.wYear = 2011;
-    std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"yy", CAL_GREGORIAN));
-    std::wstring expected(L"11");
-    ASSERT_EQ(expected, actual);    
-}
-
-TEST(TestGetDateFormatEx, Format_yy_By2009Gets09) {
-    SYSTEMTIME st;
-    st.wYear = 2009;
-    std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"yy", CAL_GREGORIAN));
-    std::wstring expected(L"09");
-    ASSERT_EQ(expected, actual);    
-}
-
-TEST(TestGetDateFormatEx, Format_y_By2009Gets9) {
-    SYSTEMTIME st;
-    st.wYear = 2009;
-    std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"y", CAL_GREGORIAN));
-    std::wstring expected(L"9");
-    ASSERT_EQ(expected, actual);    
-}
-
-TEST(TestGetDateFormatEx, FormatNullString) {
-    SYSTEMTIME st;
-    st.wYear = 2009;
-    std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, L"", CAL_GREGORIAN));
-    std::wstring expected(L"");
-    ASSERT_EQ(expected, actual);    
-}
+INSTANTIATE_TEST_CASE_P(
+    YearFormat,
+    TestYearFormat,
+    ::testing::ValuesIn(GenYearFormatTestParamList()));
 
 
 //////////////////////////////////////////////////////////////////////
