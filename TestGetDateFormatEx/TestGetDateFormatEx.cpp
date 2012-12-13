@@ -16,8 +16,8 @@ struct DateFormatTestParam {
 class TestDateFormat : public ::testing::TestWithParam<DateFormatTestParam> {
 };
 
-TEST_P(TestDateFormat, FormatYearGetsStrings) {
-    DateFormatTestParam param = GetParam();
+TEST_P(TestDateFormat, FormatToString) {
+    DateFormatTestParam const &param = GetParam();
     
     SYSTEMTIME st;
     st.wYear = param.year;
@@ -54,11 +54,11 @@ INSTANTIATE_TEST_CASE_P(
 //////////////////////////////////////////////////////////////////////
 // Win32 API's GetDateFormatEx Test
 //////////////////////////////////////////////////////////////////////
-class TestWin32GetDateFormatEx_
+class TestWin32GetDateFormatEx
     : public ::testing::TestWithParam<DateFormatTestParam> {
 };
 
-TEST_P(TestWin32GetDateFormatEx_, FormatToString) {
+TEST_P(TestWin32GetDateFormatEx, FormatToString) {
     DateFormatTestParam const& param(GetParam());
     
     SYSTEMTIME st = {};
@@ -89,5 +89,5 @@ std::vector<DateFormatTestParam> GenWin32GetDateFormatTestParamList() {
 
 INSTANTIATE_TEST_CASE_P(
     DateFormat,
-    TestWin32GetDateFormatEx_,
+    TestWin32GetDateFormatEx,
     ::testing::ValuesIn(GenWin32GetDateFormatTestParamList()));
