@@ -33,10 +33,9 @@ std::wstring GetDateFormatEx(
 
 std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
-    DWORD dwFlags,
+    CALID CalendarID,
     SYSTEMTIME const* st,
-    LPCWSTR lpFormat,
-    CALID CalendarID)
+    LPCWSTR lpFormat)
 {
     if (wcscmp(lpFormat, L"yyyy") == 0) {
         return boost::lexical_cast<std::wstring>(st->wYear);

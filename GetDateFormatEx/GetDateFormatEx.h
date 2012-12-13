@@ -16,10 +16,9 @@ extern std::wstring GetDateFormatEx(
 
 extern std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
-    DWORD dwFlags,
+    CALID CalendarID,
     SYSTEMTIME const* st,
-    LPCWSTR lpFormat,
-    CALID CalendarID);
+    LPCWSTR lpFormat);
 
 
 #endif  /* GETDATEFORMATEX_GETDATEFORMATEX_H_ */

@@ -20,7 +20,7 @@ TEST_P(TestYearFormat, FormatYearGetsStrings) {
     SYSTEMTIME st;
     st.wYear = param.year;
     std::wstring actual(
-        GetDateFormatEx(L"en-US", 0, &st, param.format, CAL_GREGORIAN));
+        GetDateFormatEx(L"en-US", CAL_GREGORIAN, &st, param.format));
     std::wstring expected(param.expected);
     ASSERT_EQ(expected, actual);    
 }
