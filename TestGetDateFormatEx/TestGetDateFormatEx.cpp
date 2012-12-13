@@ -4,7 +4,7 @@
 
 #include "GetDateFormatEx.h"
 
-struct YearFormatTestParam {
+struct DateFormatTestParam {
     WORD year;
     WORD month;
     WORD day;
@@ -13,11 +13,11 @@ struct YearFormatTestParam {
 };
 
 
-class TestYearFormat : public ::testing::TestWithParam<YearFormatTestParam> {
+class TestDateFormat : public ::testing::TestWithParam<DateFormatTestParam> {
 };
 
-TEST_P(TestYearFormat, FormatYearGetsStrings) {
-    YearFormatTestParam param = GetParam();
+TEST_P(TestDateFormat, FormatYearGetsStrings) {
+    DateFormatTestParam param = GetParam();
     
     SYSTEMTIME st;
     st.wYear = param.year;
@@ -29,8 +29,8 @@ TEST_P(TestYearFormat, FormatYearGetsStrings) {
     ASSERT_EQ(expected, actual);    
 }
 
-std::vector<YearFormatTestParam> GenYearFormatTestParamList() {
-    static YearFormatTestParam params[] = {
+std::vector<DateFormatTestParam> GenDateFormatTestParamList() {
+    static DateFormatTestParam params[] = {
         { 2012, 8, 12, L"", L"" },
         { 2012, 8, 12, L"yyyy", L"2012" },
         { 2011, 8, 12, L"yyyy", L"2011" },
@@ -42,13 +42,13 @@ std::vector<YearFormatTestParam> GenYearFormatTestParamList() {
         { 2012, 8, 12, L"MM", L"08" },
         { 2012, 8, 12, L"M", L"8" },
     };
-    return std::vector<YearFormatTestParam>(params, params + _countof(params));
+    return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
 
 INSTANTIATE_TEST_CASE_P(
-    YearFormat,
-    TestYearFormat,
-    ::testing::ValuesIn(GenYearFormatTestParamList()));
+    DateFormat,
+    TestDateFormat,
+    ::testing::ValuesIn(GenDateFormatTestParamList()));
 
 
 //////////////////////////////////////////////////////////////////////
