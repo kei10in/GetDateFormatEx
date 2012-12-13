@@ -7,9 +7,11 @@
 
 #include "targetver.h"
 
+#include <Windows.h>
+
 #include <stdio.h>
 #include <tchar.h>
 
+#include "gtest/gtest.h"
 
-
-// TODO: プログラムに必要な追加ヘッダーをここで参照してください。
+#include "GetDateFormatEx.h"
