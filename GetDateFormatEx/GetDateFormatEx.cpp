@@ -230,6 +230,11 @@ const wchar_t* wcschr_not(const wchar_t* str, wchar_t ch)
     return str;
 }
 
+bool IsPictureChar(wchar_t wc)
+{
+    return wc == L'y' || wc == L'M' || wc == L'd' || wc == L'g';
+}
+
 
 std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
@@ -244,9 +249,14 @@ std::wstring GetDateFormatEx(
 
     std::wstringstream ss;
     while (*lpPos) {
-        ss << detail_::FormatDatePicture(
-            lpLocaleName, CalendarID, lpDate, lpPos);
-        lpPos = wcschr_not(lpPos, *lpPos);
+        if (IsPictureChar(*lpPos)) {
+            ss << detail_::FormatDatePicture(
+                lpLocaleName, CalendarID, lpDate, lpPos);
+            lpPos = wcschr_not(lpPos, *lpPos);
+        } else {
+            ss << *lpPos;
+            ++lpPos;
+        }
     }
     return ss.str();
 }

@@ -48,6 +48,7 @@ std::vector<DateFormatTestParam> GenDateFormatTestParamList() {
         { 2012, 8,  1, L"gg", L"A.D." },
         { 2012, 8,  1, L"g", L"A.D." },
         { 2012, 8,  1, L"yyMM", L"1208" },
+        { 2012, 8,  1, L"yy/dd", L"12/01" },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
