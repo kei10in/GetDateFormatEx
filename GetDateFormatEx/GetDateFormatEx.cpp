@@ -1,5 +1,6 @@
 #include <Windows.h>
 
+#include <algorithm>
 #include <vector>
 #include <sstream>
 #include <iomanip>
@@ -223,6 +224,13 @@ std::wstring FormatDatePicture(
 }
 
 
+const wchar_t* wcschr_not(const wchar_t* str, wchar_t ch)
+{
+    while (*str && *str == ch) { ++str; }
+    return str;
+}
+
+
 std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
@@ -232,8 +240,15 @@ std::wstring GetDateFormatEx(
     SYSTEMTIME st(*lpDate);
     detail_::ValidateSystemTime(&st);
 
-    return ::detail_::FormatDatePicture(
-        lpLocaleName, CalendarID, lpDate, lpFormat);
+    LPCWSTR lpPos(lpFormat);
+
+    std::wstringstream ss;
+    while (*lpPos) {
+        ss << detail_::FormatDatePicture(
+            lpLocaleName, CalendarID, lpDate, lpPos);
+        lpPos = wcschr_not(lpPos, *lpPos);
+    }
+    return ss.str();
 }
 
 
