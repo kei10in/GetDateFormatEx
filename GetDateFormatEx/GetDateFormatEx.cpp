@@ -10,6 +10,14 @@
 
 #include "GetDateFormatEx.h"
 
+
+inline const wchar_t* wcschr_not(const wchar_t* str, wchar_t ch)
+{
+    while (*str && *str == ch) { ++str; }
+    return str;
+}
+
+
 namespace detail_ {
 
 std::wstring GetCalendarInfoEx(
@@ -176,16 +184,20 @@ std::wstring FormatDatePicture(
             return true;
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
-    
-    if (wcscmp(lpFormat, L"yyyy") == 0) {
-        return boost::lexical_cast<std::wstring>(lpDate->wYear);
-    } else if (wcscmp(lpFormat, L"yy") == 0) {
-        std::wstringstream ss;
-        ss << std::right << std::setw(2) << std::setfill(L'0')
-           << lpDate->wYear % 100;
-        return ss.str();
-    } else if (*lpFormat == L'y') {
-        return boost::lexical_cast<std::wstring>(lpDate->wYear % 100);
+
+    if (*lpFormat == L'y') {
+        LPCWSTR lpNext = wcschr_not(lpFormat, L'y');
+        size_t count = std::distance(lpFormat, lpNext);
+        if (count >= 3) {
+            return boost::lexical_cast<std::wstring>(lpDate->wYear);
+        } else if (count == 2) {
+            std::wstringstream ss;
+            ss << std::right << std::setw(2) << std::setfill(L'0')
+               << lpDate->wYear % 100;
+            return ss.str();
+        } else {
+            return boost::lexical_cast<std::wstring>(lpDate->wYear % 100);
+        }
     } else if (wcscmp(lpFormat, L"MMMM") == 0) {
         CALTYPE CalType(detail_::MonthNameCalTypes[lpDate->wMonth - 1]);
         return detail_::GetCalendarInfoEx(
@@ -223,12 +235,6 @@ std::wstring FormatDatePicture(
 
 }
 
-
-const wchar_t* wcschr_not(const wchar_t* str, wchar_t ch)
-{
-    while (*str && *str == ch) { ++str; }
-    return str;
-}
 
 bool IsPictureChar(wchar_t wc)
 {
