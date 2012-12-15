@@ -175,7 +175,8 @@ std::wstring FormatDatePicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
     SYSTEMTIME const* lpDate,
-    LPCWSTR lpFormat)
+    WCHAR type,
+    size_t count)
 {
     std::vector<std::wstring> eras;
     detail_::EnumCalendarInfoExEx(
@@ -185,9 +186,7 @@ std::wstring FormatDatePicture(
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
 
-    if (*lpFormat == L'y') {
-        LPCWSTR lpNext = wcschr_not(lpFormat, L'y');
-        size_t const count = std::distance(lpFormat, lpNext);
+    if (type == L'y') {
         if (count >= 3) {
             return boost::lexical_cast<std::wstring>(lpDate->wYear);
         } else if (count == 2) {
@@ -198,9 +197,7 @@ std::wstring FormatDatePicture(
         } else {
             return boost::lexical_cast<std::wstring>(lpDate->wYear % 100);
         }
-    } else if (*lpFormat == L'M') {
-        LPCWSTR lpNext = wcschr_not(lpFormat, L'M');
-        size_t const count = std::distance(lpFormat, lpNext);
+    } else if (type == L'M') {
         if (count >= 4) {
             CALTYPE CalType(detail_::MonthNameCalTypes[lpDate->wMonth - 1]);
             return detail_::GetCalendarInfoEx(
@@ -217,9 +214,7 @@ std::wstring FormatDatePicture(
         } else {
             return boost::lexical_cast<std::wstring>(lpDate->wMonth);
         }
-    } else if (*lpFormat == L'd') {
-        LPCWSTR lpNext = wcschr_not(lpFormat, L'd');
-        size_t const count = std::distance(lpFormat, lpNext);
+    } else if (type == L'd') {
         if (count >= 4) {
             CALTYPE CalType(detail_::DayOfWeekCalTypes[lpDate->wDayOfWeek]);
             return detail_::GetCalendarInfoEx(
@@ -235,7 +230,7 @@ std::wstring FormatDatePicture(
         } else {
             return boost::lexical_cast<std::wstring>(lpDate->wDay);
         }   
-    } else if (*lpFormat == L'g' || wcscmp(lpFormat, L"gg") == 0) {
+    } else if (type == L'g') {
         return eras[0];
     }
     return L"";
@@ -269,9 +264,12 @@ std::wstring GetDateFormatEx(
     std::wstringstream ss;
     while (*lpPos) {
         if (IsPictureChar(*lpPos)) {
+            LPCWSTR lpNext = wcschr_not(lpPos, *lpPos);
+            size_t const count = std::distance(lpPos, lpNext);
+            
             ss << detail_::FormatDatePicture(
-                lpLocaleName, CalendarID, lpDate, lpPos);
-            lpPos = wcschr_not(lpPos, *lpPos);
+                lpLocaleName, CalendarID, lpDate, *lpPos, count);
+            lpPos = lpNext;
         } else if (IsQuote(*lpPos)) {
             ++lpPos;
             for (; *lpPos != L'\0'; ++lpPos) {
