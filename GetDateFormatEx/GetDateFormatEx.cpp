@@ -161,18 +161,13 @@ static CALTYPE const DayOfWeekCalTypes[] = {
     CAL_SDAYNAME6,
 };
 
-}
 
-
-std::wstring GetDateFormatEx(
+std::wstring FormatDatePicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpSystemTime,
+    SYSTEMTIME const* lpDate,
     LPCWSTR lpFormat)
 {
-    SYSTEMTIME st(*lpSystemTime);
-    detail_::ValidateSystemTime(&st);
-
     std::vector<std::wstring> eras;
     detail_::EnumCalendarInfoExEx(
         [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
@@ -180,46 +175,65 @@ std::wstring GetDateFormatEx(
             return true;
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
-        
+    
     if (wcscmp(lpFormat, L"yyyy") == 0) {
-        return boost::lexical_cast<std::wstring>(st.wYear);
+        return boost::lexical_cast<std::wstring>(lpDate->wYear);
     } else if (wcscmp(lpFormat, L"yy") == 0) {
         std::wstringstream ss;
         ss << std::right << std::setw(2) << std::setfill(L'0')
-           << st.wYear % 100;
+           << lpDate->wYear % 100;
         return ss.str();
     } else if (*lpFormat == L'y') {
-        return boost::lexical_cast<std::wstring>(st.wYear % 100);
+        return boost::lexical_cast<std::wstring>(lpDate->wYear % 100);
     } else if (wcscmp(lpFormat, L"MMMM") == 0) {
-        CALTYPE CalType(detail_::MonthNameCalTypes[st.wMonth - 1]);
+        CALTYPE CalType(detail_::MonthNameCalTypes[lpDate->wMonth - 1]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     } else if (wcscmp(lpFormat, L"MMM") == 0) {
-        CALTYPE CalType(detail_::AbbrevMonthNameCalTypes[st.wMonth - 1]);
+        CALTYPE CalType(detail_::AbbrevMonthNameCalTypes[lpDate->wMonth - 1]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     } else if (wcscmp(lpFormat, L"MM") == 0) {
         std::wstringstream ss;
-        ss << std::right << std::setw(2) << std::setfill(L'0') << st.wMonth;
+        ss << std::right << std::setw(2) << std::setfill(L'0')
+           << lpDate->wMonth;
         return ss.str();
     } else if (*lpFormat == L'M') {
-        return boost::lexical_cast<std::wstring>(st.wMonth);
+        return boost::lexical_cast<std::wstring>(lpDate->wMonth);
     } else if (wcscmp(lpFormat, L"dddd") == 0) {
-        CALTYPE CalType(detail_::DayOfWeekCalTypes[st.wDayOfWeek]);
+        CALTYPE CalType(detail_::DayOfWeekCalTypes[lpDate->wDayOfWeek]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     } else if (wcscmp(lpFormat, L"ddd") == 0) {
-        CALTYPE CalType(detail_::AbbrevDayOfWeekCalTypes[st.wDayOfWeek]);
+        CALTYPE CalType(detail_::AbbrevDayOfWeekCalTypes[lpDate->wDayOfWeek]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     } else if (wcscmp(lpFormat, L"dd") == 0) {
         std::wstringstream ss;
-        ss << std::right << std::setw(2) << std::setfill(L'0') << st.wDay;
+        ss << std::right << std::setw(2) << std::setfill(L'0') << lpDate->wDay;
         return ss.str();
     } else if (*lpFormat == L'd') {
-        return boost::lexical_cast<std::wstring>(st.wDay);
+        return boost::lexical_cast<std::wstring>(lpDate->wDay);
     } else if (*lpFormat == L'g' || wcscmp(lpFormat, L"gg") == 0) {
         return eras[0];
     }
     return L"";
 }
+
+}
+
+
+std::wstring GetDateFormatEx(
+    LPCWSTR lpLocaleName,
+    CALID CalendarID,
+    SYSTEMTIME const* lpDate,
+    LPCWSTR lpFormat)
+{
+    SYSTEMTIME st(*lpDate);
+    detail_::ValidateSystemTime(&st);
+
+    return ::detail_::FormatDatePicture(
+        lpLocaleName, CalendarID, lpDate, lpFormat);
+}
+
+
