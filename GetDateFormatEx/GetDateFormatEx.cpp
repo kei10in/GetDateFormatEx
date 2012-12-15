@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <functional>
 
 #include <boost/lexical_cast.hpp>
 
@@ -50,6 +51,34 @@ BOOL ValidateSystemTime(SYSTEMTIME* lpSystemTime)
     lpSystemTime->wDayOfWeek = SystemTime.wDayOfWeek;
 
     return fts_res;
+}
+
+
+BOOL CALLBACK EnumCalendarInfoProcExEx(
+    LPWSTR lpCalendarInfoString,
+    CALID Calendar,
+    LPWSTR lpReserved,
+    LPARAM lParam)
+{
+    typedef std::function<bool (LPWSTR, CALID, LPWSTR)> FuncT;
+    auto proc = reinterpret_cast<FuncT*>(lParam);
+    return BOOL((*proc)(lpCalendarInfoString, Calendar, lpReserved));
+}
+
+bool EnumCalendarInfoExEx(
+    std::function<bool (LPWSTR, CALID, LPWSTR)> proc,
+    LPCWSTR lpLocaleName,
+    CALID Calendar,
+    LPCWSTR lpReserved,
+    CALTYPE CalType)
+{
+    return ::EnumCalendarInfoExEx(
+        detail_::EnumCalendarInfoProcExEx,
+        lpLocaleName,
+        Calendar,
+        lpReserved,
+        CalType,
+        reinterpret_cast<LPARAM>(&proc)) ? true : false;
 }
 
 }
@@ -143,7 +172,15 @@ std::wstring GetDateFormatEx(
 {
     SYSTEMTIME st(*lpSystemTime);
     detail_::ValidateSystemTime(&st);
-    
+
+    std::vector<std::wstring> eras;
+    detail_::EnumCalendarInfoExEx(
+        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
+            eras.push_back(lpCalendarInfoString);
+            return true;
+        },
+        lpLocaleName, CalendarID, 0, CAL_SERASTRING);
+        
     if (wcscmp(lpFormat, L"yyyy") == 0) {
         return boost::lexical_cast<std::wstring>(st.wYear);
     } else if (wcscmp(lpFormat, L"yy") == 0) {
@@ -181,6 +218,8 @@ std::wstring GetDateFormatEx(
         return ss.str();
     } else if (*lpFormat == L'd') {
         return boost::lexical_cast<std::wstring>(st.wDay);
+    } else if (*lpFormat == L'g' || wcscmp(lpFormat, L"gg") == 0) {
+        return eras[0];
     }
     return L"";
 }

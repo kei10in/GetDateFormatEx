@@ -45,6 +45,8 @@ std::vector<DateFormatTestParam> GenDateFormatTestParamList() {
         { 2012, 8, 12, L"ddd", L"Sun" },
         { 2012, 8,  1, L"dd", L"01" },
         { 2012, 8,  1, L"d", L"1" },
+        { 2012, 8,  1, L"gg", L"A.D." },
+        { 2012, 8,  1, L"g", L"A.D." },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
@@ -88,6 +90,8 @@ std::vector<DateFormatTestParam> GenWin32GetDateFormatTestParamList() {
         { 2012, 8, 12, L"MM", L"08" },
         { 2012, 8, 12, L"M", L"8" },
         { 2012, 8, 12, L"ddd", L"Sun" },
+        { 2012, 8,  1, L"gg", L"A.D." },
+        { 2012, 8,  1, L"g", L"A.D." },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
