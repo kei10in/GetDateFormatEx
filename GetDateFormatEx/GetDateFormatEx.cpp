@@ -235,6 +235,11 @@ bool IsPictureChar(wchar_t wc)
     return wc == L'y' || wc == L'M' || wc == L'd' || wc == L'g';
 }
 
+bool IsQuote(wchar_t wc)
+{
+    return wc == L'\'';
+}
+
 
 std::wstring GetDateFormatEx(
     LPCWSTR lpLocaleName,
@@ -253,6 +258,20 @@ std::wstring GetDateFormatEx(
             ss << detail_::FormatDatePicture(
                 lpLocaleName, CalendarID, lpDate, lpPos);
             lpPos = wcschr_not(lpPos, *lpPos);
+        } else if (IsQuote(*lpPos)) {
+            ++lpPos;
+            for (; *lpPos != L'\0'; ++lpPos) {
+                if (IsQuote(*lpPos)) {
+                    ++lpPos;
+                    if (IsQuote(*lpPos)) {
+                        ss << *lpPos;
+                    } else {
+                        break;
+                    }
+                } else {
+                    ss << *lpPos;
+                }
+            }
         } else {
             ss << *lpPos;
             ++lpPos;
