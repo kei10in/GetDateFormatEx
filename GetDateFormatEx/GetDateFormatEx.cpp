@@ -252,6 +252,15 @@ std::wstring FormatEraPicture(
     SYSTEMTIME const* lpDate,
     size_t /* repeat */)
 {
+    std::vector<WORD> yearOffsets;
+    detail_::EnumCalendarInfoExEx(
+        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
+            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
+            yearOffsets.push_back(offset);
+            return true;
+        },
+        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
+    
     std::vector<std::wstring> eras;
     detail_::EnumCalendarInfoExEx(
         [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
@@ -259,7 +268,12 @@ std::wstring FormatEraPicture(
             return true;
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
-    return eras[0];
+
+    auto found = std::find_if(
+        yearOffsets.begin(), yearOffsets.end(),
+        [&](WORD offset) -> bool { return lpDate->wYear >= offset; });
+
+    return eras[std::distance(yearOffsets.begin(), found)];
 }
 
 std::wstring FormatDatePicture(

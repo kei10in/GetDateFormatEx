@@ -61,6 +61,13 @@ std::vector<DateFormatTestParam> GenDateFormatTestParamList() {
         { L"en-US", CAL_GREGORIAN, 2012, 8,  1, L"yyyyy", L"2012" },
         { L"en-US", CAL_GREGORIAN, 2012, 8,  1, L"MMMMM", L"August" },
         { L"en-US", CAL_GREGORIAN, 2012, 8,  1, L"ddddd", L"Sunday" },
+        { L"ja-JP", CAL_JAPAN, 2012, 8,  12, L"gg", L"ïΩê¨" },
+        { L"ja-JP", CAL_JAPAN, 1989, 8,  12, L"gg", L"ïΩê¨" },
+        { L"ja-JP", CAL_JAPAN, 1988, 8,  12, L"gg", L"è∫òa" },
+        { L"ja-JP", CAL_JAPAN, 1926, 8,  12, L"gg", L"è∫òa" },
+        { L"ja-JP", CAL_JAPAN, 1925, 8,  12, L"gg", L"ëÂê≥" },
+        { L"ja-JP", CAL_JAPAN, 1912, 8,  12, L"gg", L"ëÂê≥" },
+        { L"ja-JP", CAL_JAPAN, 1911, 8,  12, L"gg", L"ñæé°" },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
