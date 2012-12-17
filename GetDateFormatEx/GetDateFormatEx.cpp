@@ -170,6 +170,32 @@ static CALTYPE const DayOfWeekCalTypes[] = {
     CAL_SDAYNAME6,
 };
 
+struct YearOffset {
+    WORD offset;
+    size_t index;
+};
+
+YearOffset GetYearOffset(
+    LPCWSTR lpLocaleName,
+    CALID CalendarID,
+    SYSTEMTIME const* lpDate)
+{
+    YearOffset yearOffset = {};
+    detail_::EnumCalendarInfoExEx(
+        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
+            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
+            if (lpDate->wYear >= offset) {
+                // year - yearOffset Ç≈åvéZÇ≈Ç´ÇÈÇÊÇ§Ç…Ç∑ÇÈÇΩÇﬂ -1 Ç∑ÇÈÅB
+                yearOffset.offset = offset - 1;
+                return false;
+            }
+            ++(yearOffset.index);
+            return true;
+        },
+        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
+    return yearOffset;
+}
+
 
 std::wstring FormatYearPicture(
     LPCWSTR lpLocaleName,
@@ -177,20 +203,8 @@ std::wstring FormatYearPicture(
     SYSTEMTIME const* lpDate,
     size_t repeat)
 {
-    std::vector<WORD> yearOffsets;
-    detail_::EnumCalendarInfoExEx(
-        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
-            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
-            yearOffsets.push_back(offset);
-            return true;
-        },
-        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
-    auto found = std::find_if(
-        yearOffsets.begin(), yearOffsets.end(),
-        [&](WORD offset) -> bool { return lpDate->wYear >= offset; });
-
-    WORD year = found != yearOffsets.end()
-                ? lpDate->wYear - *found + 1: lpDate->wYear;
+    WORD offset = GetYearOffset(lpLocaleName, CalendarID, lpDate).offset;
+    WORD year = lpDate->wYear - offset;
     
     if (repeat >= 3) {
         return boost::lexical_cast<std::wstring>(year);
@@ -267,15 +281,6 @@ std::wstring FormatEraPicture(
     SYSTEMTIME const* lpDate,
     size_t /* repeat */)
 {
-    std::vector<WORD> yearOffsets;
-    detail_::EnumCalendarInfoExEx(
-        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
-            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
-            yearOffsets.push_back(offset);
-            return true;
-        },
-        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
-    
     std::vector<std::wstring> eras;
     detail_::EnumCalendarInfoExEx(
         [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
@@ -284,11 +289,9 @@ std::wstring FormatEraPicture(
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
 
-    auto found = std::find_if(
-        yearOffsets.begin(), yearOffsets.end(),
-        [&](WORD offset) -> bool { return lpDate->wYear >= offset; });
+    size_t eraIndex = GetYearOffset(lpLocaleName, CalendarID, lpDate).index;
+    return eras[eraIndex];
 
-    return eras[std::distance(yearOffsets.begin(), found)];
 }
 
 std::wstring FormatDatePicture(
