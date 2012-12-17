@@ -380,6 +380,70 @@ T1 lexical_cast(T2 const& arg) {
     return value;
 }
 
+bool operator==(SYSTEMTIME const& rhs, SYSTEMTIME const& lhs)
+{
+    return rhs.wYear == lhs.wYear
+        && rhs.wMonth == lhs.wMonth
+        && rhs.wDay == lhs.wDay
+        && rhs.wHour == lhs.wHour
+        && rhs.wMinute == lhs.wMinute
+        && rhs.wSecond == lhs.wSecond
+        && rhs.wMilliseconds == lhs.wMilliseconds;
+}
+
+bool operator<(SYSTEMTIME const& rhs, SYSTEMTIME const& lhs)
+{
+    if (rhs.wYear < lhs.wYear) {
+        return true;
+    } else if (rhs.wYear > lhs.wYear) {
+        return false;
+    }
+
+    if (rhs.wMonth < lhs.wMonth) {
+        return true;
+    } else if (rhs.wMonth > lhs.wMonth) {
+        return false;
+    }
+
+    if (rhs.wDay < lhs.wDay) {
+        return true;
+    } else if (rhs.wDay > lhs.wDay) {
+        return false;
+    }
+
+    if (rhs.wHour < lhs.wHour) {
+        return true;
+    } else if (rhs.wHour > lhs.wHour) {
+        return false;
+    }
+
+    if (rhs.wMinute < lhs.wMinute) {
+        return true;
+    } else if (rhs.wMinute > lhs.wMinute) {
+        return false;
+    }
+
+    if (rhs.wSecond < lhs.wSecond) {
+        return true;
+    } else if (rhs.wSecond > lhs.wSecond) {
+        return false;
+    }
+
+    if (rhs.wMilliseconds < lhs.wMilliseconds) {
+        return true;
+    } else if (rhs.wMilliseconds > lhs.wMilliseconds) {
+        return false;
+    }
+
+    return false;
+}
+
+bool operator<=(SYSTEMTIME const& rhs, SYSTEMTIME const& lhs)
+{
+    return rhs == lhs || rhs < lhs;
+}
+
+
 CalendarDate ConvertSystemTimeToCalendarDate(
     CALID CalendarID, SYSTEMTIME const* lpSystemTime)
 {
@@ -408,16 +472,16 @@ CalendarDate ConvertSystemTimeToCalendarDate(
                 if (res == ERROR_NO_MORE_ITEMS) {
                     break;
                 }
-                auto yearEnd = std::find(buf.begin(), buf.end(), L' ');
-                auto monthEnd = std::find(yearEnd + 1, buf.end(), L' ');
-                auto dayEnd = buf.end();
-                std::wstring yearStr(buf.begin(), yearEnd);
-                std::wstring monthStr(yearEnd + 1, monthEnd);
-                std::wstring dayStr(monthEnd + 1, dayEnd);
-                WORD yearOfLast(lexical_cast<WORD>(yearStr));
-                WORD monthOfLast(lexical_cast<WORD>(monthStr));;
-                WORD dayOfLast(lexical_cast<WORD>(dayStr));
-                calDate.wYear = st.wYear - yearOfLast + 1;
+                std::wstringstream wss;
+                wss << &(buf[0]);
+                SYSTEMTIME eraFirst = {};
+                wss >> eraFirst.wYear;
+                wss >> eraFirst.wMonth;
+                wss >> eraFirst.wDay;
+                if (eraFirst <= *lpSystemTime) {
+                    calDate.Era = dwIndex;
+                    calDate.wYear = st.wYear - eraFirst.wYear + 1;
+                }
             }
             RegCloseKey(hKey);
 
@@ -427,7 +491,6 @@ CalendarDate ConvertSystemTimeToCalendarDate(
             
             return calDate;
         }
-            
             
     }
 

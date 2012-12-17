@@ -169,6 +169,7 @@ TEST_P(TestCalDate, FromSystemTime) {
     st.wDay = param.target.day;
     CalendarDate actual(
         ConvertSystemTimeToCalendarDate(CalendarID, &st));
+    ASSERT_EQ(param.expected.era, actual.Era);
     ASSERT_EQ(param.expected.year, actual.wYear);
     ASSERT_EQ(param.expected.month, actual.wMonth);
     ASSERT_EQ(param.expected.day, actual.wDay);
@@ -178,7 +179,13 @@ std::vector<CalendarDateTestParam> GenCalendarDateTestParamList() {
     static CalendarDateTestParam params[] = {
         { CAL_GREGORIAN, { 0, 2012,  8, 12 }, { 0, 2012,  8, 12 } },
         { CAL_GREGORIAN, { 0, 1982, 12, 14 }, { 0, 1982, 12, 14 } },
-        { CAL_JAPAN,     { 0, 2012,  8, 12 }, { 0,   24,  8, 12 } },
+        { CAL_JAPAN,     { 0, 2012,  8, 12 }, { 3,   24,  8, 12 } },
+        { CAL_JAPAN,     { 0, 1989,  1,  8 }, { 3,    1,  1,  8 } },
+        { CAL_JAPAN,     { 0, 1989,  1,  7 }, { 2,   64,  1,  7 } },
+        { CAL_JAPAN,     { 0, 1926, 12, 25 }, { 2,    1, 12, 25 } },
+        { CAL_JAPAN,     { 0, 1926, 12, 24 }, { 1,   15, 12, 24 } },
+        { CAL_JAPAN,     { 0, 1912,  7, 30 }, { 1,    1,  7, 30 } },
+        { CAL_JAPAN,     { 0, 1912,  7, 29 }, { 0,   45,  7, 29 } },
     };
     return std::vector<CalendarDateTestParam>(
         params, params + _countof(params));
