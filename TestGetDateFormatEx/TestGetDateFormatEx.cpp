@@ -141,3 +141,47 @@ INSTANTIATE_TEST_CASE_P(
     DateFormat,
     TestWin32GetDateFormatEx,
     ::testing::ValuesIn(GenWin32GetDateFormatTestParamList()));
+
+
+
+struct CalendarDateTestParam {
+    CALID calendar;
+    struct Date {
+        WORD year;
+        WORD month;
+        WORD day;
+    } target, expected;
+};
+
+
+class TestCalendarDate
+    : public ::testing::TestWithParam<CalendarDateTestParam> {
+};
+
+TEST_P(TestCalendarDate, ConvertSystemTimeToCalendarDate) {
+    CalendarDateTestParam const &param = GetParam();
+
+    CALID CalendarID = param.calendar;
+    SYSTEMTIME st = {};
+    st.wYear = param.target.year;
+    st.wMonth = param.target.month;
+    st.wDay = param.target.day;
+    CalendarDate actual(
+        ConvertSystemTimeToCalendarDate(CalendarID, &st));
+    ASSERT_EQ(param.expected.year, actual.wYear);
+    ASSERT_EQ(param.expected.month, actual.wMonth);
+    ASSERT_EQ(param.expected.day, actual.wDay);
+}
+
+std::vector<CalendarDateTestParam> GenCalendarDateTestParamList() {
+    static CalendarDateTestParam params[] = {
+        { CAL_GREGORIAN, { 2012, 8, 12 }, { 2012, 8, 12 } },
+    };
+    return std::vector<CalendarDateTestParam>(
+        params, params + _countof(params));
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ConvertToCalendarDate,
+    TestCalendarDate,
+    ::testing::ValuesIn(GenCalendarDateTestParamList()));

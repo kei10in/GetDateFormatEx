@@ -369,3 +369,11 @@ std::wstring GetDateFormatEx(
     }
     return ss.str();
 }
+
+
+CalendarDate ConvertSystemTimeToCalendarDate(
+    CALID CalendarID, SYSTEMTIME const* lpSystemTime)
+{
+    CalendarDate calDate = {CAL_GREGORIAN, 0, 2012, 8, 12, 0};
+    return calDate;
+}

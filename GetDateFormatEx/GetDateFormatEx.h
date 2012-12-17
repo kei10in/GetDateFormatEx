@@ -21,4 +21,17 @@ extern std::wstring GetDateFormatEx(
     LPCWSTR lpFormat);
 
 
+struct CalendarDate {
+    CALID Calendar;
+    UINT  Era;
+    WORD  wYear;
+    WORD  wMonth;
+    WORD  wDay;
+    WORD  wDayOfWeek;
+};
+
+extern CalendarDate ConvertSystemTimeToCalendarDate(
+    CALID CalendarID, SYSTEMTIME const* lpSystemTime);
+
+
 #endif  /* GETDATEFORMATEX_GETDATEFORMATEX_H_ */
