@@ -176,19 +176,34 @@ std::wstring FormatYearPicture(
     CALID CalendarID,
     SYSTEMTIME const* lpDate,
     size_t repeat)
-{    
+{
+    std::vector<WORD> yearOffsets;
+    detail_::EnumCalendarInfoExEx(
+        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
+            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
+            yearOffsets.push_back(offset);
+            return true;
+        },
+        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
+    auto found = std::find_if(
+        yearOffsets.begin(), yearOffsets.end(),
+        [&](WORD offset) -> bool { return lpDate->wYear >= offset; });
+
+    WORD year = found != yearOffsets.end()
+                ? lpDate->wYear - *found + 1: lpDate->wYear;
+    
     if (repeat >= 3) {
-        return boost::lexical_cast<std::wstring>(lpDate->wYear);
+        return boost::lexical_cast<std::wstring>(year);
     }
 
     if (repeat == 2) {
         std::wstringstream ss;
         ss << std::right << std::setw(2) << std::setfill(L'0')
-           << lpDate->wYear % 100;
+           << year % 100;
         return ss.str();
     }
 
-    return boost::lexical_cast<std::wstring>(lpDate->wYear % 100);
+    return boost::lexical_cast<std::wstring>(year % 100);
 }
 
 std::wstring FormatMonthPicture(
