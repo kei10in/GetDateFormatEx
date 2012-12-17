@@ -175,7 +175,8 @@ TEST_P(TestCalendarDate, ConvertSystemTimeToCalendarDate) {
 
 std::vector<CalendarDateTestParam> GenCalendarDateTestParamList() {
     static CalendarDateTestParam params[] = {
-        { CAL_GREGORIAN, { 2012, 8, 12 }, { 2012, 8, 12 } },
+        { CAL_GREGORIAN, { 2012,  8, 12 }, { 2012, 8, 12 } },
+        { CAL_GREGORIAN, { 1982, 12, 14 }, { 1982, 12, 14 } },
     };
     return std::vector<CalendarDateTestParam>(
         params, params + _countof(params));

@@ -374,6 +374,9 @@ std::wstring GetDateFormatEx(
 CalendarDate ConvertSystemTimeToCalendarDate(
     CALID CalendarID, SYSTEMTIME const* lpSystemTime)
 {
-    CalendarDate calDate = {CAL_GREGORIAN, 0, 2012, 8, 12, 0};
+    SYSTEMTIME st(*lpSystemTime);
+    detail_::ValidateSystemTime(&st);
+    CalendarDate calDate
+        = { CAL_GREGORIAN, 0, st.wYear, st.wMonth, st.wDay, st.wDayOfWeek };
     return calDate;
 }
