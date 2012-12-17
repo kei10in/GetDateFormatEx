@@ -147,6 +147,7 @@ INSTANTIATE_TEST_CASE_P(
 struct CalendarDateTestParam {
     CALID calendar;
     struct Date {
+        UINT era;
         WORD year;
         WORD month;
         WORD day;
@@ -154,11 +155,11 @@ struct CalendarDateTestParam {
 };
 
 
-class TestCalendarDate
+class TestCalDate
     : public ::testing::TestWithParam<CalendarDateTestParam> {
 };
 
-TEST_P(TestCalendarDate, ConvertSystemTimeToCalendarDate) {
+TEST_P(TestCalDate, FromSystemTime) {
     CalendarDateTestParam const &param = GetParam();
 
     CALID CalendarID = param.calendar;
@@ -175,8 +176,9 @@ TEST_P(TestCalendarDate, ConvertSystemTimeToCalendarDate) {
 
 std::vector<CalendarDateTestParam> GenCalendarDateTestParamList() {
     static CalendarDateTestParam params[] = {
-        { CAL_GREGORIAN, { 2012,  8, 12 }, { 2012, 8, 12 } },
-        { CAL_GREGORIAN, { 1982, 12, 14 }, { 1982, 12, 14 } },
+        { CAL_GREGORIAN, { 0, 2012,  8, 12 }, { 0, 2012,  8, 12 } },
+        { CAL_GREGORIAN, { 0, 1982, 12, 14 }, { 0, 1982, 12, 14 } },
+        { CAL_JAPAN,     { 0, 2012,  8, 12 }, { 0,   24,  8, 12 } },
     };
     return std::vector<CalendarDateTestParam>(
         params, params + _countof(params));
@@ -184,5 +186,16 @@ std::vector<CalendarDateTestParam> GenCalendarDateTestParamList() {
 
 INSTANTIATE_TEST_CASE_P(
     ConvertToCalendarDate,
-    TestCalendarDate,
+    TestCalDate,
     ::testing::ValuesIn(GenCalendarDateTestParamList()));
+
+
+#include <sstream>
+
+TEST(hoge, hoge) {
+    std::wstringstream ss;
+    ss << L"010";
+    int n;
+    ss >> n;
+    ASSERT_EQ(10, n);
+}

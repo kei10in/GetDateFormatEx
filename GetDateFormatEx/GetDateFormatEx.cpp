@@ -371,12 +371,64 @@ std::wstring GetDateFormatEx(
 }
 
 
+template <typename T1, typename T2>
+T1 lexical_cast(T2 const& arg) {
+    std::wstringstream wss;
+    wss << arg;
+    T1 value;
+    wss >> value;
+    return value;
+}
+
 CalendarDate ConvertSystemTimeToCalendarDate(
     CALID CalendarID, SYSTEMTIME const* lpSystemTime)
 {
     SYSTEMTIME st(*lpSystemTime);
     detail_::ValidateSystemTime(&st);
-    CalendarDate calDate
-        = { CAL_GREGORIAN, 0, st.wYear, st.wMonth, st.wDay, st.wDayOfWeek };
-    return calDate;
+    switch (CalendarID) {
+        case CAL_GREGORIAN:
+        default: {
+            CalendarDate calDate
+                = { CAL_GREGORIAN, 0,
+                    st.wYear, st.wMonth, st.wDay, st.wDayOfWeek };
+            return calDate;
+        }
+        case CAL_JAPAN: {
+            CalendarDate calDate = { CAL_JAPAN, 0 };
+            HKEY hKey;
+            RegOpenKeyExW(
+                HKEY_LOCAL_MACHINE,
+                L"SYSTEM\\CurrentControlSet\\Control\\Nls\\Calendars\\Japanese\\Eras",
+                0, KEY_READ, &hKey);
+            for (DWORD dwIndex = 0; ; ++dwIndex) {
+                std::vector<WCHAR> buf(16383);
+                DWORD bufSize(static_cast<DWORD>(buf.size()));;
+                LONG res = RegEnumValue(
+                    hKey, dwIndex, &(buf[0]), &bufSize, 0, 0, 0, 0);
+                if (res == ERROR_NO_MORE_ITEMS) {
+                    break;
+                }
+                auto yearEnd = std::find(buf.begin(), buf.end(), L' ');
+                auto monthEnd = std::find(yearEnd + 1, buf.end(), L' ');
+                auto dayEnd = buf.end();
+                std::wstring yearStr(buf.begin(), yearEnd);
+                std::wstring monthStr(yearEnd + 1, monthEnd);
+                std::wstring dayStr(monthEnd + 1, dayEnd);
+                WORD yearOfLast(lexical_cast<WORD>(yearStr));
+                WORD monthOfLast(lexical_cast<WORD>(monthStr));;
+                WORD dayOfLast(lexical_cast<WORD>(dayStr));
+                calDate.wYear = st.wYear - yearOfLast + 1;
+            }
+            RegCloseKey(hKey);
+
+            calDate.wMonth = st.wMonth;
+            calDate.wDay = st.wDay;
+            calDate.wDayOfWeek = st.wDayOfWeek;
+            
+            return calDate;
+        }
+            
+            
+    }
+
 }
