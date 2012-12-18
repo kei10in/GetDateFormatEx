@@ -6,10 +6,17 @@
 #include <iomanip>
 #include <functional>
 
-#include <boost/lexical_cast.hpp>
-
 #include "GetDateFormatEx.h"
 
+
+template <typename T1, typename T2>
+T1 lexical_cast(T2 const& arg) {
+    std::wstringstream wss;
+    wss << arg;
+    T1 value;
+    wss >> value;
+    return value;
+}
 
 inline const wchar_t* wcschr_not(const wchar_t* str, wchar_t ch)
 {
@@ -183,7 +190,7 @@ YearOffset GetYearOffset(
     YearOffset yearOffset = {};
     detail_::EnumCalendarInfoExEx(
         [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
-            WORD offset = boost::lexical_cast<WORD>(lpCalendarInfoString);
+            WORD offset = lexical_cast<WORD>(lpCalendarInfoString);
             if (lpDate->wYear >= offset) {
                 // year - yearOffset ‚ÅŒvŽZ‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß -1 ‚·‚éB
                 yearOffset.offset = offset - 1;
@@ -207,7 +214,7 @@ std::wstring FormatYearPicture(
     WORD year = lpDate->wYear - offset;
     
     if (repeat >= 3) {
-        return boost::lexical_cast<std::wstring>(year);
+        return lexical_cast<std::wstring>(year);
     }
 
     if (repeat == 2) {
@@ -217,7 +224,7 @@ std::wstring FormatYearPicture(
         return ss.str();
     }
 
-    return boost::lexical_cast<std::wstring>(year % 100);
+    return lexical_cast<std::wstring>(year % 100);
 }
 
 std::wstring FormatMonthPicture(
@@ -245,7 +252,7 @@ std::wstring FormatMonthPicture(
         return ss.str();
     }
 
-    return boost::lexical_cast<std::wstring>(lpDate->wMonth);
+    return lexical_cast<std::wstring>(lpDate->wMonth);
 }
 
 std::wstring FormatDayPicture(
@@ -272,7 +279,7 @@ std::wstring FormatDayPicture(
         return ss.str();
     }
 
-    return boost::lexical_cast<std::wstring>(lpDate->wDay);
+    return lexical_cast<std::wstring>(lpDate->wDay);
 }
 
 std::wstring FormatEraPicture(
@@ -370,15 +377,6 @@ std::wstring GetDateFormatEx(
     return ss.str();
 }
 
-
-template <typename T1, typename T2>
-T1 lexical_cast(T2 const& arg) {
-    std::wstringstream wss;
-    wss << arg;
-    T1 value;
-    wss >> value;
-    return value;
-}
 
 bool operator==(SYSTEMTIME const& rhs, SYSTEMTIME const& lhs)
 {
