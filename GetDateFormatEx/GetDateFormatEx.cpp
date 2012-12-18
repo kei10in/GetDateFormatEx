@@ -441,6 +441,17 @@ bool operator<=(SYSTEMTIME const& rhs, SYSTEMTIME const& lhs)
     return rhs == lhs || rhs < lhs;
 }
 
+namespace detail_ {
+
+SYSTEMTIME JapaneseEra[] = {
+    { 1868,  1, 0,  1, 0 },
+    { 1912,  7, 0, 30, 0 },
+    { 1926, 12, 0, 25, 0 },
+    { 1989,  1, 0,  8, 0 },
+};
+
+}
+
 
 CalendarDate ConvertSystemTimeToCalendarDate(
     CALID CalendarID, SYSTEMTIME const* lpSystemTime)
@@ -457,31 +468,15 @@ CalendarDate ConvertSystemTimeToCalendarDate(
         }
         case CAL_JAPAN: {
             CalendarDate calDate = { CAL_JAPAN, 0 };
-            HKEY hKey;
-            RegOpenKeyExW(
-                HKEY_LOCAL_MACHINE,
-                L"SYSTEM\\CurrentControlSet\\Control\\Nls\\Calendars\\Japanese\\Eras",
-                0, KEY_READ, &hKey);
-            for (DWORD dwIndex = 0; ; ++dwIndex) {
-                std::vector<WCHAR> buf(16383);
-                DWORD bufSize(static_cast<DWORD>(buf.size()));;
-                LONG res = RegEnumValue(
-                    hKey, dwIndex, &(buf[0]), &bufSize, 0, 0, 0, 0);
-                if (res == ERROR_NO_MORE_ITEMS) {
-                    break;
-                }
-                std::wstringstream wss;
-                wss << &(buf[0]);
-                SYSTEMTIME eraFirst = {};
-                wss >> eraFirst.wYear;
-                wss >> eraFirst.wMonth;
-                wss >> eraFirst.wDay;
-                if (eraFirst <= *lpSystemTime) {
+            for (DWORD dwIndex = 0;
+                 dwIndex < _countof(detail_::JapaneseEra);
+                 ++dwIndex) {
+                if (detail_::JapaneseEra[dwIndex] <= *lpSystemTime) {
                     calDate.Era = dwIndex;
-                    calDate.wYear = st.wYear - eraFirst.wYear + 1;
+                    calDate.wYear
+                        = st.wYear - detail_::JapaneseEra[dwIndex].wYear + 1;
                 }
             }
-            RegCloseKey(hKey);
 
             calDate.wMonth = st.wMonth;
             calDate.wDay = st.wDay;
