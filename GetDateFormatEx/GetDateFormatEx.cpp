@@ -177,70 +177,41 @@ static CALTYPE const DayOfWeekCalTypes[] = {
     CAL_SDAYNAME6,
 };
 
-struct YearOffset {
-    WORD offset;
-    size_t index;
-};
-
-YearOffset GetYearOffset(
-    LPCWSTR lpLocaleName,
-    CALID CalendarID,
-    SYSTEMTIME const* lpDate)
-{
-    YearOffset yearOffset = {};
-    detail_::EnumCalendarInfoExEx(
-        [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
-            WORD offset = lexical_cast<WORD>(lpCalendarInfoString);
-            if (lpDate->wYear >= offset) {
-                // year - yearOffset ‚ÅŒvŽZ‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß -1 ‚·‚éB
-                yearOffset.offset = offset - 1;
-                return false;
-            }
-            ++(yearOffset.index);
-            return true;
-        },
-        lpLocaleName, CalendarID, 0, CAL_IYEAROFFSETRANGE);
-    return yearOffset;
-}
-
 
 std::wstring FormatYearPicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpDate,
+    CalendarDate const* lpCalDate,
     size_t repeat)
 {
-    WORD offset = GetYearOffset(lpLocaleName, CalendarID, lpDate).offset;
-    WORD year = lpDate->wYear - offset;
-    
     if (repeat >= 3) {
-        return lexical_cast<std::wstring>(year);
+        return lexical_cast<std::wstring>(lpCalDate->wYear);
     }
 
     if (repeat == 2) {
         std::wstringstream ss;
         ss << std::right << std::setw(2) << std::setfill(L'0')
-           << year % 100;
+           << lpCalDate->wYear % 100;
         return ss.str();
     }
 
-    return lexical_cast<std::wstring>(year % 100);
+    return lexical_cast<std::wstring>(lpCalDate->wYear % 100);
 }
 
 std::wstring FormatMonthPicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpDate,
+    CalendarDate const* lpCalDate,
     size_t repeat)
 {
     if (repeat >= 4) {
-        CALTYPE CalType(detail_::MonthNameCalTypes[lpDate->wMonth - 1]);
+        CALTYPE CalType(detail_::MonthNameCalTypes[lpCalDate->wMonth - 1]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     }
 
     if (repeat == 3) {
-        CALTYPE CalType(detail_::AbbrevMonthNameCalTypes[lpDate->wMonth - 1]);
+        CALTYPE CalType(detail_::AbbrevMonthNameCalTypes[lpCalDate->wMonth - 1]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     }
@@ -248,55 +219,58 @@ std::wstring FormatMonthPicture(
     if (repeat == 2) {
         std::wstringstream ss;
         ss << std::right << std::setw(2) << std::setfill(L'0')
-           << lpDate->wMonth;
+           << lpCalDate->wMonth;
         return ss.str();
     }
 
-    return lexical_cast<std::wstring>(lpDate->wMonth);
+    return lexical_cast<std::wstring>(lpCalDate->wMonth);
 }
 
 std::wstring FormatDayPicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpDate,
+    CalendarDate const* lpCalDate,
     size_t repeat)
 {
     if (repeat >= 4) {
-        CALTYPE CalType(detail_::DayOfWeekCalTypes[lpDate->wDayOfWeek]);
+        CALTYPE CalType(
+            detail_::DayOfWeekCalTypes[lpCalDate->wDayOfWeek]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     }
 
     if (repeat == 3) {
-        CALTYPE CalType(detail_::AbbrevDayOfWeekCalTypes[lpDate->wDayOfWeek]);
+        CALTYPE CalType(
+            detail_::AbbrevDayOfWeekCalTypes[lpCalDate->wDayOfWeek]);
         return detail_::GetCalendarInfoEx(
             lpLocaleName, CalendarID, 0, CalType, 0);
     }
 
     if (repeat == 2) {
         std::wstringstream ss;
-        ss << std::right << std::setw(2) << std::setfill(L'0') << lpDate->wDay;
+        ss << std::right << std::setw(2) << std::setfill(L'0')
+           << lpCalDate->wDay;
         return ss.str();
     }
 
-    return lexical_cast<std::wstring>(lpDate->wDay);
+    return lexical_cast<std::wstring>(lpCalDate->wDay);
 }
 
 std::wstring FormatEraPicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpDate,
+    CalendarDate const* lpCalDate,
     size_t /* repeat */)
 {
     std::vector<std::wstring> eras;
     detail_::EnumCalendarInfoExEx(
         [&](LPWSTR lpCalendarInfoString, CALID Calendar, LPWSTR) -> bool {
-            eras.push_back(lpCalendarInfoString);
+            eras.insert(eras.begin(), lpCalendarInfoString);
             return true;
         },
         lpLocaleName, CalendarID, 0, CAL_SERASTRING);
 
-    size_t eraIndex = GetYearOffset(lpLocaleName, CalendarID, lpDate).index;
+    size_t eraIndex = lpCalDate->Era;
     return eras[eraIndex];
 
 }
@@ -304,19 +278,23 @@ std::wstring FormatEraPicture(
 std::wstring FormatDatePicture(
     LPCWSTR lpLocaleName,
     CALID CalendarID,
-    SYSTEMTIME const* lpDate,
+    CalendarDate const* lpCalDate,
     WCHAR type,
     size_t repeat)
 {
     switch (type) {
         case L'y':
-            return FormatYearPicture(lpLocaleName, CalendarID, lpDate, repeat);
+            return FormatYearPicture(
+                lpLocaleName, CalendarID, lpCalDate, repeat);
         case L'M':
-            return FormatMonthPicture(lpLocaleName, CalendarID, lpDate, repeat);
+            return FormatMonthPicture(
+                lpLocaleName, CalendarID, lpCalDate, repeat);
         case L'd':
-            return FormatDayPicture(lpLocaleName, CalendarID, lpDate, repeat);
+            return FormatDayPicture(
+                lpLocaleName, CalendarID, lpCalDate, repeat);
         case L'g':
-            return FormatEraPicture(lpLocaleName, CalendarID, lpDate, repeat);
+            return FormatEraPicture(
+                lpLocaleName, CalendarID, lpCalDate, repeat);
         default:
             return L"";
     }
@@ -343,6 +321,7 @@ std::wstring GetDateFormatEx(
 {
     SYSTEMTIME st(*lpDate);
     detail_::ValidateSystemTime(&st);
+    CalendarDate cd(ConvertSystemTimeToCalendarDate(CalendarID, &st));
 
     LPCWSTR lpPos(lpFormat);
 
@@ -353,7 +332,7 @@ std::wstring GetDateFormatEx(
             size_t const repeat = std::distance(lpPos, lpNext);
             
             ss << detail_::FormatDatePicture(
-                lpLocaleName, CalendarID, lpDate, *lpPos, repeat);
+                lpLocaleName, CalendarID, &cd, *lpPos, repeat);
             lpPos = lpNext;
         } else if (IsQuote(*lpPos)) {
             ++lpPos;
