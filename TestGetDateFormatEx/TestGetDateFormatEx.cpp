@@ -75,6 +75,7 @@ std::vector<DateFormatTestParam> GenDateFormatTestParamList() {
         { L"ja-JP", CAL_JAPAN, 1926, 12, 24, L"y", L"15" },
         { L"ja-JP", CAL_JAPAN, 1912, 7,  30, L"y", L"1" },
         { L"ja-JP", CAL_JAPAN, 1912, 7,  29, L"y", L"45" },
+        { L"th-TH", CAL_THAI,  2012, 8,  12, L"yyyy", L"2555" },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
@@ -133,6 +134,7 @@ std::vector<DateFormatTestParam> GenWin32GetDateFormatTestParamList() {
         { L"en-US", 0, 2012, 8,  1, L"yyy", L"2012" },
         { L"en-US", 0, 2012, 8,  12, L"ddddd", L"Sunday" },
         { L"en-US", 0, 2012, 8,  1, L"ggg", L"A.D." },
+        { L"th-TH", 0, 2012, 8,  1, L"yyyy", L"2555" },
     };
     return std::vector<DateFormatTestParam>(params, params + _countof(params));
 }
