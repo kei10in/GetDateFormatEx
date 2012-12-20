@@ -429,6 +429,21 @@ SYSTEMTIME JapaneseEra[] = {
     { 1989,  1, 0,  8, 0 },
 };
 
+
+int GetYearOffsetRange(CALID CalendarID) 
+{
+    switch (CalendarID) {
+        case CAL_THAI:
+            return lexical_cast<WORD>(
+                detail_::GetCalendarInfoEx(
+                    L"th-TH", CalendarID, 0, CAL_IYEAROFFSETRANGE, 0));
+        case CAL_KOREA:
+            return 2333;
+        default:
+            return 0;
+    }
+}
+
 }
 
 
@@ -463,11 +478,10 @@ CalendarDate ConvertSystemTimeToCalendarDate(
             
             return calDate;
         }
-        case CAL_THAI: {
-            CalendarDate calDate = { CAL_THAI, 0 };
-            WORD offset(lexical_cast<WORD>(
-                detail_::GetCalendarInfoEx(
-                    L"th-TH", CAL_THAI, 0, CAL_IYEAROFFSETRANGE, 0)));
+        case CAL_THAI:
+        case CAL_KOREA: {
+            CalendarDate calDate = { CalendarID, 0 };
+            int offset(detail_::GetYearOffsetRange(CalendarID));
             calDate.wYear = st.wYear + offset;
             calDate.wMonth = st.wMonth;
             calDate.wDay = st.wDay;
